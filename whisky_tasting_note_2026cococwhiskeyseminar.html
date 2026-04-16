@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whisky Tasting Note — COCOC</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Noto+Serif+KR:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f0ebe0;
+    color: #2C1F0E;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .sheet {
+    width: 210mm;
+    min-height: 297mm;
+    background: #FDFAF5;
+    margin: 12mm auto;
+    padding: 0;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* TOP BAR */
+  .top-bar {
+    background: #B8860B;
+    padding: 5.5mm 18mm;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .top-bar .title {
+    font-family: 'Playfair Display', serif;
+    font-size: 14pt;
+    color: white;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .top-bar .subtitle {
+    font-size: 7.5pt;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .top-bar-line {
+    height: 0.5px;
+    background: #E8D5A0;
+    margin: 0 18mm;
+  }
+
+  /* BODY */
+  .body {
+    padding: 6mm 18mm 10mm;
+    flex: 1;
+  }
+
+  /* SECTION */
+  .section { margin-bottom: 5mm; }
+
+  .sec-header {
+    background: #5C3A1E;
+    padding: 2mm 3.5mm;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 4mm;
+  }
+  .sec-step {
+    font-size: 6.5pt;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-width: 14mm;
+  }
+  .sec-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 9pt;
+    color: white;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .sec-title-en {
+    font-size: 7.5pt;
+    color: rgba(255,255,255,0.65);
+    margin-left: 4px;
+    font-weight: 300;
+  }
+
+  /* FIELDS */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+
+  .field { display: flex; flex-direction: column; gap: 2px; }
+  .field-label {
+    font-size: 6.5pt;
+    color: #6B5744;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+  .field-line {
+    border: none;
+    border-bottom: 0.5px solid #D4C5A0;
+    height: 6mm;
+    width: 100%;
+    background: transparent;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 9pt;
+    color: #2C1F0E;
+    outline: none;
+  }
+  .field-box {
+    border: 0.5px solid #D4C5A0;
+    background: white;
+    width: 100%;
+    height: 18mm;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 9pt;
+    color: #2C1F0E;
+    padding: 2mm;
+    outline: none;
+    resize: none;
+  }
+  .field-box-sm {
+    height: 13mm;
+  }
+  .field-box-lg {
+    height: 24mm;
+  }
+
+  /* COLOR CHIPS */
+  .color-section { margin-bottom: 4mm; }
+  .color-row { display: flex; gap: 3px; align-items: flex-start; margin-top: 3px; }
+  .color-col { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .chip {
+    width: 8mm; height: 8mm;
+    border-radius: 2mm;
+    border: 0.5px solid #D4C5A0;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .chip:hover { transform: scale(1.1); }
+  .chip-label {
+    font-size: 5pt;
+    color: #6B5744;
+    text-align: center;
+    line-height: 1.2;
+    max-width: 8mm;
+    word-break: break-word;
+  }
+
+  /* TAGS */
+  .tag-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+  .tag {
+    font-size: 7.5pt;
+    padding: 1.5mm 3mm;
+    border: 0.5px solid #D4C5A0;
+    border-radius: 10mm;
+    background: #F5EFE0;
+    color: #2C1F0E;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .tag:hover, .tag.on { background: #E8D5A0; border-color: #B8860B; }
+
+  /* CHECKBOXES */
+  .check-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2mm; }
+  .check-item { display: flex; align-items: center; gap: 2mm; cursor: pointer; }
+  .check-box {
+    width: 4mm; height: 4mm;
+    border: 0.5px solid #D4C5A0;
+    border-radius: 1mm;
+    background: white;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7pt; color: #B8860B;
+  }
+  .check-label { font-size: 7.5pt; color: #2C1F0E; }
+
+  /* SCORE */
+  .star-row { display: flex; gap: 3px; margin-top: 2mm; }
+  .star {
+    width: 7mm; height: 7mm;
+    background: #F5EFE0;
+    border: 0.5px solid #D4C5A0;
+    border-radius: 1.5mm;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12pt; color: #D4C5A0;
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+  .star.on { color: #B8860B; background: #FBF0D0; border-color: #B8860B; }
+
+  /* COMPARE TABLE */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 7.5pt; margin-top: 2mm; }
+  .compare-table th {
+    background: #EDE3CC;
+    color: #5C3A1E;
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 500;
+    font-size: 8pt;
+    padding: 2mm 3mm;
+    border: 0.5px solid #D4C5A0;
+    text-align: center;
+  }
+  .compare-table td {
+    border: 0.5px solid #D4C5A0;
+    padding: 2mm 3mm;
+    background: #FDFAF5;
+    height: 7mm;
+    vertical-align: top;
+    color: #2C1F0E;
+  }
+  .compare-table .row-label {
+    font-size: 7pt;
+    color: #6B5744;
+    background: #F5EFE0;
+    font-weight: 500;
+    white-space: nowrap;
+    width: 22mm;
+  }
+
+  /* DIVIDER */
+  .divider { height: 0.5px; background: #D4C5A0; margin: 4mm 0; }
+
+  /* BOTTOM BAR */
+  .bottom-bar {
+    background: #B8860B;
+    padding: 2.5mm 18mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .bottom-bar span {
+    font-size: 7pt;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 0.06em;
+  }
+
+  /* PAGE 2 */
+  .sheet-2 { margin-top: 0; }
+
+  /* PRINT */
+  @media print {
+    body { background: white; }
+    .sheet { margin: 0; box-shadow: none; width: 100%; min-height: 100vh; }
+    .sheet + .sheet { page-break-before: always; }
+    .no-print { display: none !important; }
+  }
+
+  /* PRINT BUTTON */
+  .print-btn-wrap { text-align: center; padding: 8mm 0; }
+  .print-btn {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 9pt;
+    letter-spacing: 0.08em;
+    padding: 3mm 10mm;
+    border: 0.5px solid #B8860B;
+    background: white;
+    color: #B8860B;
+    cursor: pointer;
+    border-radius: 1mm;
+    transition: all 0.15s;
+  }
+  .print-btn:hover { background: #B8860B; color: white; }
+</style>
+</head>
+<body>
+
+<!-- PRINT BUTTON -->
+<div class="print-btn-wrap no-print">
+  <button class="print-btn" onclick="window.print()">🖨 PDF로 저장 / 인쇄</button>
+</div>
+
+<!-- ===== PAGE 1 ===== -->
+<div class="sheet">
+  <div class="top-bar">
+    <span class="title">Whisky Tasting Note</span>
+    <span class="subtitle">COCOC Whisky Session</span>
+  </div>
+  <div class="top-bar-line"></div>
+
+  <div class="body">
+
+    <!-- 기본 정보 -->
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-step"></span>
+        <span class="sec-title">기본 정보 <span class="sec-title-en">Basic Information</span></span>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <span class="field-label">Whisky Name</span>
+          <input class="field-line" placeholder="e.g. Buffalo Trace" />
+        </div>
+        <div class="field">
+          <span class="field-label">Distillery</span>
+          <input class="field-line" placeholder="e.g. Buffalo Trace Distillery" />
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="field">
+          <span class="field-label">Origin / Country</span>
+          <input class="field-line" placeholder="e.g. Kentucky, USA" />
+        </div>
+        <div class="field">
+          <span class="field-label">Age</span>
+          <input class="field-line" placeholder="e.g. 12YO / NAS" />
+        </div>
+        <div class="field">
+          <span class="field-label">ABV</span>
+          <input class="field-line" placeholder="e.g. 45%" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <span class="field-label">Category</span>
+          <input class="field-line" placeholder="Bourbon / Sherry Cask / Peated / Other" />
+        </div>
+        <div class="field">
+          <span class="field-label">Date & Session</span>
+          <input class="field-line" placeholder="e.g. 2025.04 · 코콕 위스키 세션" />
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1: APPEARANCE -->
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-step">Step 1</span>
+        <span class="sec-title">보기 <span class="sec-title-en">Appearance</span></span>
+      </div>
+
+      <div class="color-section">
+        <span class="field-label">Color — 해당하는 색을 선택하세요</span>
+        <div class="color-row" id="colorRow">
+          <div class="color-col"><div class="chip" style="background:#FDFBF0" onclick="pickColor(this,'gin clear')"></div><span class="chip-label">gin clear</span></div>
+          <div class="color-col"><div class="chip" style="background:#F7EFB0" onclick="pickColor(this,'pale straw')"></div><span class="chip-label">pale straw</span></div>
+          <div class="color-col"><div class="chip" style="background:#EDD96A" onclick="pickColor(this,'pale gold')"></div><span class="chip-label">pale gold</span></div>
+          <div class="color-col"><div class="chip" style="background:#D4A830" onclick="pickColor(this,'yellow gold')"></div><span class="chip-label">yellow gold</span></div>
+          <div class="color-col"><div class="chip" style="background:#C08020" onclick="pickColor(this,'old gold')"></div><span class="chip-label">old gold</span></div>
+          <div class="color-col"><div class="chip" style="background:#C06010" onclick="pickColor(this,'amber')"></div><span class="chip-label">amber</span></div>
+          <div class="color-col"><div class="chip" style="background:#A84A10" onclick="pickColor(this,'deep copper')"></div><span class="chip-label">deep copper</span></div>
+          <div class="color-col"><div class="chip" style="background:#8B3010" onclick="pickColor(this,'burnished')"></div><span class="chip-label">burnished</span></div>
+          <div class="color-col"><div class="chip" style="background:#7A1A20" onclick="pickColor(this,'chestnut')"></div><span class="chip-label">chestnut</span></div>
+          <div class="color-col"><div class="chip" style="background:#5C1010" onclick="pickColor(this,'tawny')"></div><span class="chip-label">tawny</span></div>
+          <div class="color-col"><div class="chip" style="background:#3A0A08" onclick="pickColor(this,'treacle')"></div><span class="chip-label">treacle</span></div>
+          <div style="display:flex;align-items:center;margin-left:4px;">
+            <span id="colorLabel" style="font-size:7.5pt;color:#6B5744;font-style:italic;">선택: —</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Legs / Viscosity</span>
+        <div class="check-row">
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Thin</span></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Medium</span></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Thick</span></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Oily</span></div>
+          <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Very Oily</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: NOSE -->
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-step">Step 2</span>
+        <span class="sec-title">말기 <span class="sec-title-en">Nose</span></span>
+      </div>
+      <div class="grid-2" style="margin-bottom:5px;">
+        <div class="field">
+          <span class="field-label">First Impression — 첫 향, 지배적 아로마</span>
+          <textarea class="field-box field-box-sm"></textarea>
+        </div>
+        <div class="field">
+          <span class="field-label">After Water — 물 한 방울 후 변화</span>
+          <textarea class="field-box field-box-sm"></textarea>
+        </div>
+      </div>
+      <div class="field">
+        <span class="field-label">Aroma Tags — 느껴지는 향에 클릭</span>
+        <div class="tag-row">
+          <span class="tag" onclick="this.classList.toggle('on')">바닐라</span>
+          <span class="tag" onclick="this.classList.toggle('on')">카라멜</span>
+          <span class="tag" onclick="this.classList.toggle('on')">오크</span>
+          <span class="tag" onclick="this.classList.toggle('on')">건과일</span>
+          <span class="tag" onclick="this.classList.toggle('on')">셰리</span>
+          <span class="tag" onclick="this.classList.toggle('on')">스모키</span>
+          <span class="tag" onclick="this.classList.toggle('on')">피트</span>
+          <span class="tag" onclick="this.classList.toggle('on')">허브</span>
+          <span class="tag" onclick="this.classList.toggle('on')">꽃향</span>
+          <span class="tag" onclick="this.classList.toggle('on')">시트러스</span>
+          <span class="tag" onclick="this.classList.toggle('on')">곡물</span>
+          <span class="tag" onclick="this.classList.toggle('on')">너트</span>
+          <span class="tag" onclick="this.classList.toggle('on')">스파이스</span>
+          <span class="tag" onclick="this.classList.toggle('on')">초콜릿</span>
+          <span class="tag" onclick="this.classList.toggle('on')">바다/요오드</span>
+          <span class="tag" onclick="this.classList.toggle('on')">버터</span>
+          <span class="tag" onclick="this.classList.toggle('on')">가죽</span>
+          <span class="tag" onclick="this.classList.toggle('on')">토피</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: TASTE -->
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-step">Step 3</span>
+        <span class="sec-title">맛보기 <span class="sec-title-en">Taste</span></span>
+      </div>
+      <div class="grid-3">
+        <div class="field">
+          <span class="field-label">Palate — 어떤 맛이 나는가?</span>
+          <textarea class="field-box"></textarea>
+        </div>
+        <div class="field">
+          <span class="field-label">Mouthfeel — 목넘김</span>
+          <textarea class="field-box"></textarea>
+        </div>
+        <div class="field">
+          <span class="field-label">Finish — 여운의 길이와 느낌</span>
+          <textarea class="field-box"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-bar">
+    <span>— 코콕 위스키 세션 —</span>
+    <span>Page 1 / 2</span>
+  </div>
+</div>
+
+<!-- ===== PAGE 2 ===== -->
+<div class="sheet sheet-2">
+  <div class="top-bar">
+    <span class="title">Whisky Tasting Note</span>
+    <span class="subtitle">COCOC Whisky Session</span>
+  </div>
+  <div class="top-bar-line"></div>
+
+  <div class="body">
+
+    <!-- STEP 4: ASSESSMENT -->
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-step">Step 4</span>
+        <span class="sec-title">종합 평가 <span class="sec-title-en">Comprehensive Assessment</span></span>
+      </div>
+
+      <div class="field" style="margin-bottom:6px;">
+        <span class="field-label">한 줄 평 — 이 위스키를 한 문장으로 표현한다면?</span>
+        <input class="field-line" />
+      </div>
+
+      <div class="grid-2" style="margin-bottom:6px;">
+        <div class="field">
+          <span class="field-label">Score</span>
+          <div class="star-row" id="stars">
+            <div class="star" onclick="setScore(1)">★</div>
+            <div class="star" onclick="setScore(2)">★</div>
+            <div class="star" onclick="setScore(3)">★</div>
+            <div class="star" onclick="setScore(4)">★</div>
+            <div class="star" onclick="setScore(5)">★</div>
+            <span id="scoreLabel" style="font-size:8pt;color:#6B5744;align-self:center;margin-left:3mm;"></span>
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label">재구매 의향</span>
+          <div class="check-row">
+            <div class="check-item" onclick="toggleSingle(this,'rebuy')"><div class="check-box"></div><span class="check-label">꼭 산다</span></div>
+            <div class="check-item" onclick="toggleSingle(this,'rebuy')"><div class="check-box"></div><span class="check-label">기회되면</span></div>
+            <div class="check-item" onclick="toggleSingle(this,'rebuy')"><div class="check-box"></div><span class="check-label">선물용으로</span></div>
+            <div class="check-item" onclick="toggleSingle(this,'rebuy')"><div class="check-box"></div><span class="check-label">안 산다</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:6px;">
+        <span class="field-label">Pairing — 어울리는 음식 / 상황</span>
+        <input class="field-line" placeholder="e.g. 다크 초콜릿, 훈제 연어, 비 오는 저녁" />
+      </div>
+
+      <div class="field">
+        <span class="field-label">Notes — 기억해두고 싶은 것, 다음에 시도해볼 것</span>
+        <textarea class="field-box field-box-sm"></textarea>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 비교 테이스팅 -->
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-step"></span>
+        <span class="sec-title">비교 테이스팅 <span class="sec-title-en">Comparative Notes</span></span>
+      </div>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="width:22mm;background:#F5EFE0;color:#6B5744;"></th>
+            <th>Bourbon</th>
+            <th>Sherry Cask</th>
+            <th>Peated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="row-label">대표 풍미</td><td></td><td></td><td></td></tr>
+          <tr><td class="row-label">컬러 (0.0~2.0)</td><td></td><td></td><td></td></tr>
+          <tr><td class="row-label">도수감</td><td></td><td></td><td></td></tr>
+          <tr><td class="row-label">피니시 길이</td><td></td><td></td><td></td></tr>
+          <tr><td class="row-label">선호도 순위</td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 세션 메모 -->
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-step"></span>
+        <span class="sec-title">세션 메모 <span class="sec-title-en">Session Notes</span></span>
+      </div>
+      <div class="field" style="margin-bottom:6px;">
+        <span class="field-label">오늘의 발견 / 인상 깊었던 것 / 다음에 마셔보고 싶은 위스키</span>
+        <textarea class="field-box field-box-lg"></textarea>
+      </div>
+      <div class="field">
+        <span class="field-label">세션 한 줄 요약</span>
+        <input class="field-line" />
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-bar">
+    <span>— 코콕 위스키 세션 —</span>
+    <span>Page 2 / 2</span>
+  </div>
+</div>
+
+<div class="print-btn-wrap no-print" style="padding-bottom:16mm;">
+  <button class="print-btn" onclick="window.print()">🖨 PDF로 저장 / 인쇄</button>
+</div>
+
+<script>
+function pickColor(el, name) {
+  document.querySelectorAll('.chip').forEach(c => c.style.outline = 'none');
+  el.style.outline = '2px solid #B8860B';
+  el.style.outlineOffset = '1px';
+  document.getElementById('colorLabel').textContent = '선택: ' + name;
+}
+function toggleCheck(el) {
+  const box = el.querySelector('.check-box');
+  const isOn = box.textContent === '✓';
+  box.textContent = isOn ? '' : '✓';
+}
+function toggleSingle(el, group) {
+  el.closest('.check-row').querySelectorAll('.check-item').forEach(item => {
+    item.querySelector('.check-box').textContent = '';
+  });
+  el.querySelector('.check-box').textContent = '✓';
+}
+function setScore(v) {
+  document.querySelectorAll('.star').forEach((s, i) => {
+    s.classList.toggle('on', i < v);
+  });
+  const labels = ['', '1 / 5', '2 / 5', '3 / 5', '4 / 5', '5 / 5'];
+  document.getElementById('scoreLabel').textContent = labels[v];
+}
+</script>
+</body>
+</html>
