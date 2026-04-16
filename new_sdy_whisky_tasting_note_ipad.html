@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Whisky Tasting Note — COCOC</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Noto+Serif+KR:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #B8860B;
+  --gold-light: #E8D5A0;
+  --gold-pale: #FBF5E6;
+  --gold-mid: #D4A830;
+  --brown-dark: #5C3A1E;
+  --brown-mid: #6B5744;
+  --brown-light: #C8B890;
+  --ink: #2C1F0E;
+  --bg: #FDFAF5;
+  --bg-warm: #F5EFE0;
+  --bg-table: #EDE3CC;
+  --white: #FFFFFF;
+  --line: #D4C5A0;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #E8E0D0;
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── VIEWS ── */
+.view { display: none; min-height: 100vh; }
+.view.active { display: block; }
+
+/* ══════════════════════════════
+   LIST VIEW
+══════════════════════════════ */
+.list-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+.list-header {
+  background: var(--gold);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 20px 24px 16px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+.list-header-left .list-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: white;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+.list-header-left .list-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+.list-header-rule {
+  height: 1px;
+  background: rgba(232,213,160,0.4);
+  margin: 0 24px;
+}
+.new-btn {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+.new-btn:active { background: rgba(255,255,255,0.28); }
+
+.list-body {
+  background: var(--bg);
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 16px 20px 20px;
+  min-height: 200px;
+}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 14px;
+}
+.empty-icon { font-size: 36px; }
+.empty-text { font-size: 15px; color: var(--brown-mid); text-align: center; line-height: 1.7; }
+
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.note-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.1s;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.note-card:active { transform: scale(0.98); background: var(--bg-warm); }
+.note-card-top { display: flex; align-items: center; gap: 10px; }
+.note-dot {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1.5px solid var(--line);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.note-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.3;
+}
+.note-meta { font-size: 11px; color: var(--brown-mid); margin-top: 1px; }
+.note-score { font-size: 12px; color: var(--gold); }
+.note-oneliner { font-size: 12px; color: var(--brown-mid); font-style: italic; line-height: 1.4; border-top: 1px solid var(--line); padding-top: 8px; font-family: 'Noto Serif KR', serif; }
+
+.list-footer {
+  background: var(--gold);
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 10px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.list-footer span { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 0.06em; }
+
+/* ══════════════════════════════
+   FORM VIEW
+══════════════════════════════ */
+.form-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+}
+.form-topbar {
+  background: var(--gold);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.form-topbar-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: white;
+  font-weight: 500;
+}
+.topbar-btn {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  color: white;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+.topbar-btn:active { background: rgba(255,255,255,0.28); }
+.topbar-btn.save { background: rgba(0,0,0,0.2); font-weight: 500; }
+.topbar-btn.save:active { background: rgba(0,0,0,0.3); }
+
+.form-card {
+  background: var(--bg);
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 0 0 24px;
+}
+
+/* ── SECTION HEADER ── */
+.sec-header {
+  background: var(--brown-dark);
+  padding: 8px 24px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.sec-step { font-size: 9px; color: rgba(255,255,255,0.45); letter-spacing: 0.1em; text-transform: uppercase; min-width: 42px; font-weight: 300; }
+.sec-kr { font-family: 'Noto Serif KR', serif; font-size: 13px; color: white; font-weight: 400; }
+.sec-en { font-size: 10px; color: rgba(255,255,255,0.45); margin-left: 3px; font-weight: 300; }
+
+.section { padding: 18px 24px; }
+.section + .sec-header { margin-top: 4px; }
+
+/* ── GRIDS ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+@media (max-width: 520px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── FIELDS ── */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field-label { font-size: 10px; color: var(--brown-mid); letter-spacing: 0.1em; text-transform: uppercase; }
+.field-input {
+  border: none; border-bottom: 1px solid var(--line);
+  background: transparent; padding: 8px 0 6px;
+  font-family: 'Noto Sans KR', sans-serif; font-size: 15px; color: var(--ink);
+  outline: none; width: 100%; -webkit-appearance: none; border-radius: 0;
+}
+.field-input:focus { border-bottom-color: var(--gold); }
+.field-input::placeholder { color: var(--brown-light); font-size: 13px; }
+.field-textarea {
+  border: 1px solid var(--line); background: var(--white);
+  padding: 10px 12px; border-radius: var(--radius-sm);
+  font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: var(--ink);
+  outline: none; width: 100%; resize: none; min-height: 72px; line-height: 1.7;
+  -webkit-appearance: none;
+}
+.field-textarea:focus { border-color: var(--gold); }
+.field-textarea::placeholder { color: var(--brown-light); font-size: 13px; }
+
+/* ── COLOR CHIPS ── */
+.color-chips {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+.chip-col { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+.chip { width: 100%; aspect-ratio: 1; border-radius: 50%; border: 2px solid transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.12); transition: transform 0.12s; }
+.chip-col:active .chip { transform: scale(0.88); }
+.chip-col.selected .chip { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,134,11,0.2); }
+.chip-name { font-size: 9px; color: var(--brown-mid); text-align: center; line-height: 1.2; width: 100%; }
+.color-selected-label { font-size: 12px; color: var(--gold); font-style: italic; margin-top: 8px; min-height: 18px; font-family: 'Noto Serif KR', serif; }
+
+/* ── PILLS / TAGS ── */
+.pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.pill { padding: 7px 16px; border: 1px solid var(--line); border-radius: 40px; font-size: 13px; color: var(--brown-mid); background: var(--white); cursor: pointer; user-select: none; transition: all 0.12s; }
+.pill:active { transform: scale(0.94); }
+.pill.on { background: var(--gold-pale); border-color: var(--gold); color: var(--brown-dark); font-weight: 500; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.tag { padding: 6px 14px; border: 1px solid var(--line); border-radius: 40px; font-size: 13px; color: var(--brown-mid); background: var(--bg-warm); cursor: pointer; user-select: none; transition: all 0.12s; }
+.tag:active { transform: scale(0.94); }
+.tag.on { background: var(--gold-pale); border-color: var(--gold); color: var(--brown-dark); font-weight: 500; }
+
+/* ── STARS ── */
+.star-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.star { width: 40px; height: 40px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg-warm); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--gold-light); cursor: pointer; user-select: none; transition: all 0.12s; }
+.star:active { transform: scale(0.88); }
+.star.on { background: var(--gold-pale); border-color: var(--gold); color: var(--gold); }
+.star-label { font-size: 13px; color: var(--brown-mid); font-style: italic; font-family: 'Noto Serif KR', serif; margin-left: 4px; }
+
+/* ── CMP TABLE ── */
+.cmp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.cmp-table th { background: var(--bg-table); color: var(--brown-dark); font-family: 'Noto Serif KR', serif; font-weight: 500; font-size: 13px; padding: 9px 8px; border: 1px solid var(--line); text-align: center; }
+.cmp-table td { border: 1px solid var(--line); padding: 0; background: var(--white); vertical-align: middle; }
+.cmp-table td.row-lbl { background: var(--bg-warm); color: var(--brown-mid); font-size: 12px; font-weight: 500; white-space: nowrap; padding: 8px; width: 80px; }
+.cmp-table td input { border: none; outline: none; width: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; color: var(--ink); background: transparent; padding: 8px; -webkit-appearance: none; }
+.session-box { border: 1px solid var(--line); background: var(--white); border-radius: var(--radius-sm); padding: 12px 14px; font-family: 'Noto Sans KR', sans-serif; font-size: 14px; color: var(--ink); outline: none; width: 100%; resize: none; line-height: 1.8; min-height: 100px; -webkit-appearance: none; margin-top: 10px; }
+.session-box:focus { border-color: var(--gold); }
+.form-bottom-row { padding: 16px 24px 0; display: flex; justify-content: space-between; align-items: center; }
+.delete-btn { font-family: 'Noto Sans KR', sans-serif; font-size: 12px; color: #C0392B; background: none; border: 1px solid #F0C5C5; border-radius: 40px; padding: 6px 14px; cursor: pointer; }
+.delete-btn:active { background: #FEF0F0; }
+.form-footer { background: var(--gold); border-radius: 0 0 var(--radius) var(--radius); padding: 10px 24px; display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+.form-footer span { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 0.06em; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(12px); background: rgba(30,18,8,0.88); color: white; font-size: 13px; padding: 9px 20px; border-radius: 20px; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; z-index: 100; backdrop-filter: blur(8px); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ══ VIEW: LIST ══ -->
+<div class="view active" id="viewList">
+  <div class="list-wrap">
+    <div class="list-header">
+      <div class="list-header-left">
+        <div class="list-title">Whisky Tasting Notes</div>
+        <div class="list-sub" id="listSub">COCOC Whisky Session</div>
+      </div>
+      <button class="new-btn" onclick="startNewNote()">+ 새 노트</button>
+    </div>
+    <div class="list-header-rule"></div>
+    <div class="list-body" id="listBody">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🥃</div>
+        <div class="empty-text">아직 기록된 위스키가 없어요<br>+ 새 노트를 눌러 시작해보세요</div>
+      </div>
+    </div>
+    <div class="list-footer">
+      <span>— 코콕 위스키 세션 —</span>
+      <span>Whisky Tasting Note</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VIEW: FORM ══ -->
+<div class="view" id="viewForm">
+  <div class="form-wrap">
+    <div class="form-topbar">
+      <button class="topbar-btn" onclick="goList()">← 목록</button>
+      <span class="form-topbar-title" id="formTitle">새 노트</span>
+      <button class="topbar-btn save" onclick="saveNote()">저장</button>
+    </div>
+
+    <div class="form-card">
+
+      <!-- 기본 정보 -->
+      <div class="sec-header" style="border-radius:0;">
+        <span class="sec-step"></span><span class="sec-kr">기본 정보</span><span class="sec-en">Basic Information</span>
+      </div>
+      <div class="section">
+        <div class="grid-2">
+          <div class="field"><span class="field-label">Whisky Name</span><input class="field-input" id="f_name" type="text" placeholder="e.g. Buffalo Trace" /></div>
+          <div class="field"><span class="field-label">Distillery</span><input class="field-input" id="f_distillery" type="text" placeholder="e.g. Buffalo Trace Distillery" /></div>
+        </div>
+        <div class="grid-3">
+          <div class="field"><span class="field-label">Origin</span><input class="field-input" id="f_origin" type="text" placeholder="e.g. Kentucky, USA" /></div>
+          <div class="field"><span class="field-label">Age</span><input class="field-input" id="f_age" type="text" placeholder="e.g. 12YO" /></div>
+          <div class="field"><span class="field-label">ABV</span><input class="field-input" id="f_abv" type="text" placeholder="e.g. 45%" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><span class="field-label">Category</span><input class="field-input" id="f_category" type="text" placeholder="Bourbon / Sherry Cask / Peated" /></div>
+          <div class="field"><span class="field-label">Date & Session</span><input class="field-input" id="f_date" type="text" placeholder="e.g. 2025.04 · 코콕" /></div>
+        </div>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="sec-header"><span class="sec-step">Step 1</span><span class="sec-kr">보기</span><span class="sec-en">Appearance</span></div>
+      <div class="section">
+        <div class="field">
+          <span class="field-label">Color — 탭해서 선택</span>
+          <div class="color-chips" id="colorChips">
+            <div class="chip-col" onclick="pickColor(this,'gin clear')"><div class="chip" style="background:#FDFBF0;border:1px solid #ddd;"></div><span class="chip-name">gin clear</span></div>
+            <div class="chip-col" onclick="pickColor(this,'pale straw')"><div class="chip" style="background:#F7EFB0;"></div><span class="chip-name">pale straw</span></div>
+            <div class="chip-col" onclick="pickColor(this,'pale gold')"><div class="chip" style="background:#EDD96A;"></div><span class="chip-name">pale gold</span></div>
+            <div class="chip-col" onclick="pickColor(this,'yellow gold')"><div class="chip" style="background:#D4A830;"></div><span class="chip-name">yellow gold</span></div>
+            <div class="chip-col" onclick="pickColor(this,'old gold')"><div class="chip" style="background:#C08020;"></div><span class="chip-name">old gold</span></div>
+            <div class="chip-col" onclick="pickColor(this,'amber')"><div class="chip" style="background:#C06010;"></div><span class="chip-name">amber</span></div>
+            <div class="chip-col" onclick="pickColor(this,'deep copper')"><div class="chip" style="background:#A84A10;"></div><span class="chip-name">deep copper</span></div>
+            <div class="chip-col" onclick="pickColor(this,'burnished')"><div class="chip" style="background:#8B3010;"></div><span class="chip-name">burnished</span></div>
+            <div class="chip-col" onclick="pickColor(this,'chestnut')"><div class="chip" style="background:#7A1A20;"></div><span class="chip-name">chestnut</span></div>
+            <div class="chip-col" onclick="pickColor(this,'tawny')"><div class="chip" style="background:#5C1010;"></div><span class="chip-name">tawny</span></div>
+            <div class="chip-col" onclick="pickColor(this,'treacle')"><div class="chip" style="background:#3A0A08;"></div><span class="chip-name">treacle</span></div>
+          </div>
+          <div class="color-selected-label" id="colorLabel">—</div>
+        </div>
+        <div class="field" style="margin-top:16px;">
+          <span class="field-label">Legs / Viscosity</span>
+          <div class="pill-row">
+            <span class="pill" onclick="this.classList.toggle('on')">Thin</span>
+            <span class="pill" onclick="this.classList.toggle('on')">Medium</span>
+            <span class="pill" onclick="this.classList.toggle('on')">Thick</span>
+            <span class="pill" onclick="this.classList.toggle('on')">Oily</span>
+            <span class="pill" onclick="this.classList.toggle('on')">Very Oily</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="sec-header"><span class="sec-step">Step 2</span><span class="sec-kr">말기</span><span class="sec-en">Nose</span></div>
+      <div class="section">
+        <div class="grid-2">
+          <div class="field"><span class="field-label">First Impression</span><textarea class="field-textarea" id="f_nose1" placeholder="첫 향, 지배적인 아로마"></textarea></div>
+          <div class="field"><span class="field-label">After Water</span><textarea class="field-textarea" id="f_nose2" placeholder="물 한 방울 후 변화"></textarea></div>
+        </div>
+        <div class="field" style="margin-top:16px;">
+          <span class="field-label">Aroma Tags — 탭해서 선택</span>
+          <div class="tag-row">
+            <span class="tag" onclick="this.classList.toggle('on')">바닐라</span><span class="tag" onclick="this.classList.toggle('on')">카라멜</span><span class="tag" onclick="this.classList.toggle('on')">오크</span><span class="tag" onclick="this.classList.toggle('on')">건과일</span><span class="tag" onclick="this.classList.toggle('on')">셰리</span><span class="tag" onclick="this.classList.toggle('on')">스모키</span><span class="tag" onclick="this.classList.toggle('on')">피트</span><span class="tag" onclick="this.classList.toggle('on')">허브</span><span class="tag" onclick="this.classList.toggle('on')">꽃향</span><span class="tag" onclick="this.classList.toggle('on')">시트러스</span><span class="tag" onclick="this.classList.toggle('on')">곡물</span><span class="tag" onclick="this.classList.toggle('on')">너트</span><span class="tag" onclick="this.classList.toggle('on')">스파이스</span><span class="tag" onclick="this.classList.toggle('on')">초콜릿</span><span class="tag" onclick="this.classList.toggle('on')">바다/요오드</span><span class="tag" onclick="this.classList.toggle('on')">버터</span><span class="tag" onclick="this.classList.toggle('on')">가죽</span><span class="tag" onclick="this.classList.toggle('on')">토피</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="sec-header"><span class="sec-step">Step 3</span><span class="sec-kr">맛보기</span><span class="sec-en">Taste</span></div>
+      <div class="section">
+        <div class="grid-3">
+          <div class="field"><span class="field-label">Palate — 맛</span><textarea class="field-textarea" id="f_palate" placeholder="어떤 맛이 나는가?"></textarea></div>
+          <div class="field"><span class="field-label">Mouthfeel — 질감</span><textarea class="field-textarea" id="f_mouthfeel" placeholder="목넘김은?"></textarea></div>
+          <div class="field"><span class="field-label">Finish — 여운</span><textarea class="field-textarea" id="f_finish" placeholder="얼마나, 어떻게 남는가?"></textarea></div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="sec-header"><span class="sec-step">Step 4</span><span class="sec-kr">종합 평가</span><span class="sec-en">Comprehensive Assessment</span></div>
+      <div class="section">
+        <div class="grid-2">
+          <div class="field">
+            <span class="field-label">Score</span>
+            <div class="star-row" id="stars">
+              <div class="star" onclick="setScore(1)">★</div><div class="star" onclick="setScore(2)">★</div><div class="star" onclick="setScore(3)">★</div><div class="star" onclick="setScore(4)">★</div><div class="star" onclick="setScore(5)">★</div>
+              <span class="star-label" id="scoreLabel"></span>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label">재구매 의향</span>
+            <div class="pill-row" id="rebuyPills">
+              <span class="pill" onclick="toggleSingle(this)">꼭 산다</span><span class="pill" onclick="toggleSingle(this)">기회되면</span><span class="pill" onclick="toggleSingle(this)">선물용으로</span><span class="pill" onclick="toggleSingle(this)">안 산다</span>
+            </div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:16px;"><span class="field-label">한 줄 평</span><input class="field-input" id="f_oneliner" type="text" placeholder="이 위스키를 한 문장으로 표현한다면?" /></div>
+        <div class="grid-2" style="margin-top:14px;">
+          <div class="field"><span class="field-label">Pairing</span><input class="field-input" id="f_pairing" type="text" placeholder="e.g. 다크 초콜릿, 훈제 연어" /></div>
+          <div class="field"><span class="field-label">Notes</span><input class="field-input" id="f_notes" type="text" placeholder="기억해두고 싶은 것" /></div>
+        </div>
+      </div>
+
+      <!-- 비교 -->
+      <div class="sec-header"><span class="sec-step"></span><span class="sec-kr">비교 테이스팅</span><span class="sec-en">Comparative Notes</span></div>
+      <div class="section">
+        <table class="cmp-table">
+          <thead><tr>
+            <th style="background:#F5EFE0;color:#6B5744;width:80px;"></th>
+            <th>Bourbon Cask</th><th>Sherry Cask</th><th>Peated</th>
+          </tr></thead>
+          <tbody>
+            <tr><td class="row-lbl">대표 풍미</td><td><input type="text"/></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+            <tr><td class="row-lbl">컬러</td><td><input type="text" placeholder="0.0~2.0"/></td><td><input type="text" placeholder="0.0~2.0"/></td><td><input type="text" placeholder="0.0~2.0"/></td></tr>
+            <tr><td class="row-lbl">피니시</td><td><input type="text"/></td><td><input type="text"/></td><td><input type="text"/></td></tr>
+            <tr><td class="row-lbl">선호도</td><td><input type="text" placeholder="1·2·3"/></td><td><input type="text" placeholder="1·2·3"/></td><td><input type="text" placeholder="1·2·3"/></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 세션 메모 -->
+      <div class="sec-header"><span class="sec-step"></span><span class="sec-kr">세션 메모</span><span class="sec-en">Session Notes</span></div>
+      <div class="section" style="padding-bottom:4px;">
+        <textarea class="session-box" id="f_session" placeholder="오늘의 발견 / 인상 깊었던 것 / 다음에 마셔보고 싶은 위스키..."></textarea>
+      </div>
+
+      <div class="form-bottom-row">
+        <button class="delete-btn" id="deleteBtn" onclick="deleteNote()" style="visibility:hidden">이 노트 삭제</button>
+        <div></div>
+      </div>
+
+      <div class="form-footer">
+        <span>— 코콕 위스키 세션 —</span>
+        <span>Whisky Tasting Note</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const COLOR_MAP = {
+  'gin clear':'#FDFBF0','pale straw':'#F7EFB0','pale gold':'#EDD96A',
+  'yellow gold':'#D4A830','old gold':'#C08020','amber':'#C06010',
+  'deep copper':'#A84A10','burnished':'#8B3010','chestnut':'#7A1A20',
+  'tawny':'#5C1010','treacle':'#3A0A08'
+};
+
+let notes = JSON.parse(localStorage.getItem('wtn_notes_ipad') || '[]');
+let currentNoteId = null;
+let currentScore = 0;
+let selectedColor = null;
+let selectedColorBg = null;
+
+// ── VIEWS ──
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view' + name[0].toUpperCase() + name.slice(1)).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goList() { renderList(); showView('list'); }
+
+// ── LIST ──
+function renderList() {
+  const body = document.getElementById('listBody');
+  const sub = document.getElementById('listSub');
+  sub.textContent = notes.length ? `${notes.length}개의 위스키 기록 · COCOC Whisky Session` : 'COCOC Whisky Session';
+  if (!notes.length) {
+    body.innerHTML = '';
+    body.appendChild(document.getElementById('emptyState') || createEmptyState());
+    if (!document.getElementById('emptyState')) {
+      body.innerHTML = '<div class="empty-state"><div class="empty-icon">🥃</div><div class="empty-text">아직 기록된 위스키가 없어요<br>+ 새 노트를 눌러 시작해보세요</div></div>';
+    }
+    return;
+  }
+  const sorted = [...notes].reverse();
+  body.innerHTML = `<div class="note-grid">${sorted.map(n => `
+    <div class="note-card" onclick="openNote('${n.id}')">
+      <div class="note-card-top">
+        <div class="note-dot" style="background:${n.colorBg || '#E8D5A0'}"></div>
+        <div>
+          <div class="note-name">${n.name || '(이름 없음)'}</div>
+          <div class="note-meta">${[n.origin, n.age, n.abv].filter(Boolean).join(' · ') || n.date || ''}</div>
+          ${n.score ? `<div class="note-score">${'★'.repeat(n.score)}</div>` : ''}
+        </div>
+      </div>
+      ${n.oneliner ? `<div class="note-oneliner">"${n.oneliner}"</div>` : ''}
+    </div>
+  `).join('')}</div>`;
+}
+
+// ── FORM ──
+function startNewNote() {
+  currentNoteId = null;
+  currentScore = 0;
+  selectedColor = null;
+  selectedColorBg = null;
+  resetForm();
+  document.getElementById('formTitle').textContent = '새 노트';
+  document.getElementById('deleteBtn').style.visibility = 'hidden';
+  showView('form');
+}
+
+function openNote(id) {
+  const n = notes.find(n => n.id === id);
+  if (!n) return;
+  currentNoteId = id;
+  currentScore = n.score || 0;
+  selectedColor = n.color || null;
+  selectedColorBg = n.colorBg || null;
+  resetForm();
+  // fill fields
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
+  set('f_name', n.name); set('f_distillery', n.distillery); set('f_origin', n.origin);
+  set('f_age', n.age); set('f_abv', n.abv); set('f_category', n.category); set('f_date', n.date);
+  set('f_nose1', n.nose1); set('f_nose2', n.nose2);
+  set('f_palate', n.palate); set('f_mouthfeel', n.mouthfeel); set('f_finish', n.finish);
+  set('f_oneliner', n.oneliner); set('f_pairing', n.pairing); set('f_notes', n.notes); set('f_session', n.session);
+  if (n.color) { document.getElementById('colorLabel').textContent = n.color; document.querySelectorAll('.chip-col').forEach(c => { if(c.getAttribute('onclick') && c.getAttribute('onclick').includes(`'${n.color}'`)) c.classList.add('selected'); }); }
+  if (n.legs) n.legs.forEach(l => document.querySelectorAll('#viewForm .pill').forEach(p => { if(p.textContent === l && !['꼭 산다','기회되면','선물용으로','안 산다'].includes(l)) p.classList.add('on'); }));
+  if (n.tags) n.tags.forEach(t => document.querySelectorAll('.tag').forEach(tag => { if(tag.textContent === t) tag.classList.add('on'); }));
+  if (n.score) setScore(n.score);
+  if (n.rebuy) document.querySelectorAll('#rebuyPills .pill').forEach(p => { if(p.textContent === n.rebuy) p.classList.add('on'); });
+  if (n.cmp) { const inputs = document.querySelectorAll('.cmp-table td input'); n.cmp.forEach((v,i) => { if(inputs[i]) inputs[i].value = v; }); }
+  document.getElementById('formTitle').textContent = n.name || '노트 수정';
+  document.getElementById('deleteBtn').style.visibility = 'visible';
+  showView('form');
+}
+
+function resetForm() {
+  ['f_name','f_distillery','f_origin','f_age','f_abv','f_category','f_date',
+   'f_nose1','f_nose2','f_palate','f_mouthfeel','f_finish','f_oneliner','f_pairing','f_notes','f_session']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.querySelectorAll('.tag.on, .pill.on').forEach(el => el.classList.remove('on'));
+  document.querySelectorAll('.chip-col.selected').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.star.on').forEach(el => el.classList.remove('on'));
+  document.querySelectorAll('.cmp-table td input').forEach(el => el.value = '');
+  document.getElementById('colorLabel').textContent = '—';
+  document.getElementById('scoreLabel').textContent = '';
+  currentScore = 0;
+}
+
+function collectForm() {
+  const tags = [...document.querySelectorAll('.tag.on')].map(t => t.textContent);
+  const rebuyLabels = ['꼭 산다','기회되면','선물용으로','안 산다'];
+  const legs = [...document.querySelectorAll('#viewForm .pill.on')].map(p => p.textContent).filter(t => !rebuyLabels.includes(t));
+  const rebuy = [...document.querySelectorAll('#rebuyPills .pill.on')].map(p => p.textContent)[0] || '';
+  const cmp = [...document.querySelectorAll('.cmp-table td input')].map(el => el.value);
+  return {
+    id: currentNoteId || Date.now().toString(),
+    name: document.getElementById('f_name').value,
+    distillery: document.getElementById('f_distillery').value,
+    origin: document.getElementById('f_origin').value,
+    age: document.getElementById('f_age').value,
+    abv: document.getElementById('f_abv').value,
+    category: document.getElementById('f_category').value,
+    date: document.getElementById('f_date').value,
+    color: selectedColor, colorBg: selectedColorBg,
+    legs, tags,
+    nose1: document.getElementById('f_nose1').value,
+    nose2: document.getElementById('f_nose2').value,
+    palate: document.getElementById('f_palate').value,
+    mouthfeel: document.getElementById('f_mouthfeel').value,
+    finish: document.getElementById('f_finish').value,
+    score: currentScore, rebuy,
+    oneliner: document.getElementById('f_oneliner').value,
+    pairing: document.getElementById('f_pairing').value,
+    notes: document.getElementById('f_notes').value,
+    cmp, session: document.getElementById('f_session').value,
+  };
+}
+
+function saveNote() {
+  const data = collectForm();
+  if (!data.name && !data.distillery) { showToast('위스키 이름을 입력해주세요'); return; }
+  if (currentNoteId) {
+    const idx = notes.findIndex(n => n.id === currentNoteId);
+    if (idx !== -1) notes[idx] = data; else notes.push(data);
+  } else {
+    notes.push(data);
+  }
+  localStorage.setItem('wtn_notes_ipad', JSON.stringify(notes));
+  currentNoteId = data.id;
+  showToast('저장되었습니다 ✓');
+  setTimeout(() => { renderList(); showView('list'); }, 500);
+}
+
+function deleteNote() {
+  if (!confirm('이 노트를 삭제할까요?')) return;
+  notes = notes.filter(n => n.id !== currentNoteId);
+  localStorage.setItem('wtn_notes_ipad', JSON.stringify(notes));
+  showToast('삭제되었습니다');
+  renderList();
+  showView('list');
+}
+
+// ── INTERACTIVE ──
+function pickColor(el, name) {
+  document.querySelectorAll('.chip-col').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = name;
+  selectedColorBg = COLOR_MAP[name] || '#B8860B';
+  document.getElementById('colorLabel').textContent = name;
+}
+
+function toggleSingle(el) {
+  el.closest('.pill-row').querySelectorAll('.pill').forEach(p => p.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function setScore(v) {
+  currentScore = v;
+  document.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('on', i < v));
+  document.getElementById('scoreLabel').textContent = ['','1 / 5','2 / 5','3 / 5','4 / 5','5 / 5'][v] || '';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── INIT ──
+renderList();
+</script>
+</body>
+</html>
